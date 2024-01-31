@@ -6,11 +6,7 @@ import { TryCatch } from "../middlewares/error.js";
 
 
 export const newAttendance = TryCatch(
-  async (
-    req: Request<{}, {}, NewAttendanceRequestBody>,
-    res: Response,
-    next: NextFunction
-  ) => {
+   async (req, res, next) => {
     const { idx1, idx2 } = req.body;
     const currentDate = new Date();
     const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;

@@ -154,7 +154,6 @@ export const deleteStudent = TryCatch(
 export const updateStudent = TryCatch(async (req, res, next) => {
   const { id } = req.params;
   const adminId = req.query.id; 
-
   const { name, email, mobile, library,attendance } = req.body;
   const photo = req.file;
   const student = await Student.findOne({_id:id,adminId});
