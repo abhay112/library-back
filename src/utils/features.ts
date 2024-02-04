@@ -18,13 +18,18 @@ export const invalidateCache = ({
   student,
   admin,
   studentId,
+  attendance,
 }: InvalidateCacheProps) => {
   if (student) {
     const studentKeys: string[] = [
       "latest-students",
+      `student-${studentId}`
       // "categories",
       // "all-products",
     ];
+    if (attendance) {
+      studentKeys.push(`attendance-${studentId}`);
+    }
 
     if (typeof studentId === "string") studentKeys.push(`product-${studentId}`);
 

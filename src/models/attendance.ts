@@ -10,6 +10,7 @@ interface AttendanceDocument extends Document {
             idx1:Number,
             idx2:Number,
             isPresent:string,
+            seatNumber:string,
         }
     ];
     studentName:string;

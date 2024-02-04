@@ -6,6 +6,30 @@ export interface NewUserRequestBody {
   photo: string;
   _id: string;
 }
+export interface NewSeatRequestBody {
+  matrix: number[][];
+  seats: number;
+  adminId: string;
+  _id: string;
+  filledSeats?: {
+      day:string;
+      idx1: number;
+      idx2: number;
+      isPresent:string;
+      studentId: string;
+      studentName: string;
+  }[];
+};
+export interface FetchSeatRequestBody{
+  adminId:string;
+  // studentId:string;
+  // studentName:string
+  // day:string,
+  // idx1:Number,
+  // idx2:Number,
+  // isPresent: string
+}
+
 export interface NewQueryRequestBody {
   name: string;
   email: string;
@@ -23,6 +47,8 @@ export interface NewAttendanceRequestBody {
   idx2:Number,
   isPresent: string
 }
+
+
 export interface ParamTypes{
   id:string;
 }
@@ -77,6 +103,7 @@ export interface BaseQuery {
 export type InvalidateCacheProps = {
   student?: boolean;
   admin?: boolean;
+  attendance?:boolean;
   studentId?: string | string[];
 };
 // export type InvalidateCacheProps = {

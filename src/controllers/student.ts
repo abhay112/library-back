@@ -39,7 +39,7 @@ export const newStudent = TryCatch(
         adminId: adminId,
         studentId: newStudent._id, // Use the _id of the newly created student
         studentName:newStudent.name,
-        attendance: [{ day:null, idx1: null, idx2: null, isPresent: null }],
+        attendance: [{ day:null, idx1: null, idx2: null, isPresent: null,seatNumber:null }],
       });
 
       invalidateCache({ student: true, admin: true });
@@ -76,34 +76,27 @@ export const getlatestStudents = TryCatch(async (req, res, next) => {
 export const getAllStudents = TryCatch(
   async (req: Request<{}, {}, {}, SearchRequestQuery>, res, next) => {
     const { search, name, sort } = req.query;
-
     const page = Number(req.query.page) || 1;
     // 1,2,3,4,5,6,7,8
     // 9,10,11,12,13,14,15,16
     // 17,18,19,20,21,22,23,24
     const limit =  8;
     const skip = (page - 1) * limit;
-
     const baseQuery: BaseQuery = {};
-
     if (search)
       baseQuery.name = {
         $regex: search,
         $options: "i",
       };
-
     const studentPromise = Student.find(baseQuery)
       .sort(sort && { price: sort === "asc" ? 1 : -1 })
       .limit(limit)
       .skip(skip);
-
     const [students, filteredOnlystudent] = await Promise.all([
       studentPromise,
       Student.find(baseQuery),
     ]);
-
     const totalPage = Math.ceil(filteredOnlystudent.length / limit);
-
     return res.status(200).json({
       success: true,
       students,
@@ -118,7 +111,7 @@ export const getSingleStudent = TryCatch(async (req, res, next) => {
   if (myCache.has(`student-${id}`))
     student = JSON.parse(myCache.get(`student-${id}`) as string);
   else {
-    student = await Student.findOne({ _id: id, adminId });
+    student = await Student.findOne({ _id: id});
     if (!student) return next(new ErrorHandler("student Not Found", 404));
     myCache.set(`student-${id}`, JSON.stringify(student));
   }
@@ -186,11 +179,11 @@ export const updateStudent = TryCatch(async (req, res, next) => {
   });
 });
 
-// const generateRandomStudentsWithAttendance = async (count: number = 10) => {
+// const generateRandomStudentsWithAttendance = async (count: number = 1) => {
 //   const students = [];
 //   for (let i = 0; i < count; i++) {
 //     const student = {
-//       adminId: "vijassy1234",
+//       adminId: "WwVwFGKPaPWkvXveW9F40sDEqDV2",
 //       name: faker.person.fullName(),
 //       email: faker.internet.email(),
 //       mobile: parseInt('950668666'+i),
@@ -202,7 +195,7 @@ export const updateStudent = TryCatch(async (req, res, next) => {
 //     };
 //     const newStudent = await Student.create(student);
 //     const attendance = {
-//       adminId: "vijassy1234",
+//       adminId: "WwVwFGKPaPWkvXveW9F40sDEqDV2",
 //       studentId: newStudent._id,
 //       studentName: newStudent.name,
 //       attendance: [
@@ -211,6 +204,7 @@ export const updateStudent = TryCatch(async (req, res, next) => {
 //           idx1: null,
 //           idx2: null,
 //           isPresent: null,
+//           seatNumber:null,
 //         },
 //       ],
 //     };
