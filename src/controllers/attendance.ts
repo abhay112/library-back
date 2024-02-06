@@ -17,7 +17,13 @@ export const newAttendance = TryCatch(
     const seatNumber = fetchSeat?.seats[idx1][idx2];
     const attendanceFound = await Attendance.findOne({ studentId: id, adminId: adminId });
     const seatAlready = attendanceFound?.attendance.slice(-1)[0]?.seatNumber;    
-    if (attendanceFound && seatAlready !== seatNumber) {
+    if(seatAlready === seatNumber) {
+      return res.status(201).json({
+        success: false,
+        message: `Seat already taken`,
+      });
+    }
+    else if (attendanceFound && seatAlready !== seatNumber) { //corect this condition 
       await Attendance.updateOne(
         { studentId: id },
         {
@@ -30,11 +36,6 @@ export const newAttendance = TryCatch(
       return res.status(201).json({
         success: true,
         message: `Attendance for ${formattedDate},and seatNumber is ${seatNumber} requested and updated successfully`,
-      });
-    } else if(seatAlready === seatNumber) {
-      return res.status(201).json({
-        success: false,
-        message: `Seat already taken`,
       });
     }else{
       return res.status(201).json({

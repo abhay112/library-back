@@ -19,13 +19,20 @@ const schema = new mongoose.Schema(
       validate: validator.default.isEmail,
     },
     mobile: {
-      type: String,
+      type: Number,
       required: [true, "Please enter Mobile Number"],
-      validate: validator.default.isMobilePhone,
     },
     photo: {
       type: String,
       required: [true, "Please enter Photo"],
+    },
+    shift:{ //leter it modify to dropdown meny
+      type:String, 
+      required: [true, "Please enter Shift"],
+    },
+    feesAmount:{
+      type:Number,
+      required:[false,"Please enter Monthly Fees"]
     },
     library: {
       type: String,
@@ -35,6 +42,10 @@ const schema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    active:{
+      type:Boolean,
+      required:false,
+    }
   },
   {
     timestamps: true,

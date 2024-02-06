@@ -18,12 +18,13 @@ export const newUser = TryCatch(
         success: true,
         message: `Welcome, ${user.name}`,
       });
-    if (!_id || !name || !email || !photo)
+    if (!_id || !name || !email)
       return next(new ErrorHandler("Please add all fields", 400));
     user = await User.create({
       name,
       email,
       photo,
+      library:"",
       _id,
     });
 

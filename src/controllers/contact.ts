@@ -32,6 +32,3 @@ export const newQuery = TryCatch(
     });
   }
 );
-
-
-

@@ -38,6 +38,16 @@ export interface NewQueryRequestBody {
   location:string;
   _id: string;
 }
+export interface NewEnquiryRequestBody {
+  name: string;
+  email: string;
+  mobile: string;
+  gender:string;
+  shift:string;
+  message:string;
+  adminId:string;
+  _id: string;
+}
 export interface NewAttendanceRequestBody {
   adminId:string;
   studentId:string;
@@ -58,9 +68,12 @@ export interface NewStudentRequestBody {
   name: string;
   email: string;
   mobile: number;
-  photo: string;
   library:string;
-  attendance:any; // array to set letter
+  shift:string;
+  feesAmount:number;
+  photo: string;
+  active:boolean;
+  attendance:any; // letter it will rectify array to set letter
 }
 
 export type ControllerType = (
@@ -103,6 +116,7 @@ export interface BaseQuery {
 export type InvalidateCacheProps = {
   student?: boolean;
   admin?: boolean;
+  adminId?: string;
   attendance?:boolean;
   studentId?: string | string[];
 };

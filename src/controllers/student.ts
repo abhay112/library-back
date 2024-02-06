@@ -4,22 +4,22 @@ import { BaseQuery, NewStudentRequestBody, SearchRequestQuery } from "../types/t
 import ErrorHandler from "../utils/utility-class";
 import { rm } from "fs";
 import { Student } from "../models/student";
-import { User } from "../models/user";
-import { faker } from "@faker-js/faker";
 import { myCache } from "../app.js";
-import { getCurrentFormattedDate, invalidateCache } from "../utils/features.js";
+import {  invalidateCache } from "../utils/features.js";
 import { Attendance } from "../models/attendance";
+import { User } from "../models/user";
 
 
 export const newStudent = TryCatch(
     async (req: Request<{}, {}, NewStudentRequestBody>, res, next) => {
-      const { name, email,mobile,library,attendance } = req.body;
+      const { name, email,mobile,shift,feesAmount } = req.body;
       const adminId = req.query.id;
-      const mobileAsString = mobile.toString();
-      const photo = req.file;
+      const adminDetails =await User.findOne({_id:adminId});
+      let library = adminDetails?.library || "defaultLibrary"; 
+      const photo = req?.file;
       if (!photo) return next(new ErrorHandler("Please add Photo", 400));
       if (!adminId || !name || !email || !mobile) {
-        rm(photo.path, () => {
+        rm(photo?.path, () => {
           console.log("Deleted");
         });
         return next(new ErrorHandler("Please enter All Fields", 400));
@@ -28,21 +28,23 @@ export const newStudent = TryCatch(
         adminId,
         name,
         email,
-        mobile:mobileAsString,
+        mobile:mobile.toString(),
+        shift,
+        feesAmount,
+        active:true,
         library: library? library?.toLowerCase():null,
-        photo: photo.path,
-        attendance:attendance?attendance:null,
+        photo: photo?.path,
       });
-
       // Create an initial attendance record for the new student
-      await Attendance.create({
-        adminId: adminId,
-        studentId: newStudent._id, // Use the _id of the newly created student
-        studentName:newStudent.name,
-        attendance: [{ day:null, idx1: null, idx2: null, isPresent: null,seatNumber:null }],
-      });
-
-      invalidateCache({ student: true, admin: true });
+      if(newStudent){
+        await Attendance.create({
+          adminId: adminId,
+          studentId: newStudent._id, // Use the _id of the newly created student
+          studentName:newStudent.name,
+          attendance: [{ day:null, idx1: null, idx2: null, isPresent: null,seatNumber:null }],
+        });
+      }
+      invalidateCache({ student: true, admin: true, adminId: String(adminId)});
       return res.status(201).json({
         success: true,
         message: "Student Created Successfully",
@@ -59,11 +61,12 @@ export const getlatestStudents = TryCatch(async (req, res, next) => {
       message: 'Admin ID is required in the query parameters.',
     });
   }
-  if (myCache.has("latest-students"))
-    students = JSON.parse(myCache.get("latest-students") as string);
-  else {
+  const cacheKey = `latest-students-${adminId}`;
+  if (myCache.has(cacheKey)) {
+    students = JSON.parse(myCache.get(cacheKey) as string);
+  } else {
     students = await Student.find({ adminId }).sort({ createdAt: -1 });
-    myCache.set("latest-students", JSON.stringify(students));
+    myCache.set(cacheKey, JSON.stringify(students));
   }
 
   return res.status(200).json({
@@ -133,9 +136,9 @@ export const deleteStudent = TryCatch(
     });
     await student.deleteOne();
     invalidateCache({
-      student:true,
-      studentId:String(student._id),
-      admin:true,
+      student: true,
+      admin: true,
+      adminId: String(adminId)
     });
     return res.status(200).json({
       success: true,
@@ -147,7 +150,7 @@ export const deleteStudent = TryCatch(
 export const updateStudent = TryCatch(async (req, res, next) => {
   const { id } = req.params;
   const adminId = req.query.id; 
-  const { name, email, mobile, library,attendance } = req.body;
+  const { name, email, mobile,shift,feesAmount,active } = req.body;
   const photo = req.file;
   const student = await Student.findOne({_id:id,adminId});
 
@@ -162,17 +165,21 @@ export const updateStudent = TryCatch(async (req, res, next) => {
   if (name) student.name = name;
   if (email) student.email = email;
   if (mobile) student.mobile = mobile;
-  if (library) student.library = library;
-  if (attendance) student.attendance = attendance;
+  if (shift) student.shift = shift;
+  if (feesAmount) student.feesAmount = Number(feesAmount);
+  let activeTrue = active ==='true';
+  console.log(activeTrue);
+  if(active) student.active = activeTrue;
+  // console.log("Cache keys bef update:", myCache.keys());
 
   await student.save();
-
-  invalidateCache({
+   // Invalidate cache for the list of latest students
+   invalidateCache({
     student: true,
-    studentId: String(student._id),
     admin: true,
+    adminId: String(adminId),
+    studentId:String(id),
   });
-
   return res.status(200).json({
     success: true,
     message: "student Updated Successfully",
