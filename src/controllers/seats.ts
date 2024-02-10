@@ -7,13 +7,14 @@ import { Attendance } from "../models/attendance.js";
 
 export const createSeats = TryCatch(
     async (req: Request<{}, {}, NewSeatRequestBody>, res: Response, next: NextFunction) => {
-        const { matrix, seats } = req.body;
+        const { rows,columns, matrix } = req.body;
         let adminId = req.query.id;
         let findSeats = await Seats.findOne({ adminId: adminId });
         if (!findSeats) {
             const newSeat = await Seats.create({
+                rows,
+                columns,
                 matrix,
-                seats,
                 adminId: adminId,
             });
             res.status(201).json({
@@ -23,7 +24,7 @@ export const createSeats = TryCatch(
         } else {
             const updatedSeat = await Seats.findOneAndUpdate(
                 { adminId: adminId },
-                { matrix, seats },
+                { rows,columns, matrix },
                 { new: true } // to return the updated seat
             );
             res.status(200).json({
@@ -36,7 +37,7 @@ export const createSeats = TryCatch(
 );
 
 // fetch seats for current Date;
-export const fetchSeats = TryCatch(
+export const fetchFilledSeats = TryCatch(
     async (req: Request<{}, {}, FetchSeatRequestBody>, res: Response, next: NextFunction) => {
         const {id} = req.query;
         const attendances = await Attendance.find({adminId:id});
@@ -67,6 +68,24 @@ export const fetchSeats = TryCatch(
           });
     }
 );
+export const fetchSeatLayout = TryCatch(
+    async (req: Request<{}, {}, FetchSeatRequestBody>, res: Response, next: NextFunction) => {
+        const {id} = req.query;
+        const seatLayout = await Seats.findOne({ adminId: id });
+        if (!seatLayout) {
+            return res.status(404).json({
+                success: false,
+                message: "Seat layout not found",
+            });
+        }
+        // Return seat layout data
+        return res.status(200).json({
+            success: true,
+            data: seatLayout,
+        });
+        
+    }
+)
 
 
 

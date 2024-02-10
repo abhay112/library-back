@@ -7,8 +7,9 @@ export interface NewUserRequestBody {
   _id: string;
 }
 export interface NewSeatRequestBody {
-  matrix: number[][];
-  seats: number;
+  rows:number;
+  columns:number;
+  matrix: number;
   adminId: string;
   _id: string;
   filledSeats?: {

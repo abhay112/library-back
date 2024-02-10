@@ -23,6 +23,6 @@ app.get("/:id",getStudentAllAttendance);
 app.put("/attendanceApprove/:id", adminOnly, attendanceApproved);
 
 
-app.post("/:id",adminOnly,newAttendance);
+app.post("/:id",newAttendance);
 
 export default app;

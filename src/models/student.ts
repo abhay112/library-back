@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
 
-
 const schema = new mongoose.Schema(
   {
     adminId:{
@@ -36,6 +35,10 @@ const schema = new mongoose.Schema(
     },
     library: {
       type: String,
+      required:false,
+    },
+    dateOfJoining:{
+      type:String,
       required:false,
     },
     attendance: {

@@ -1,6 +1,6 @@
 import express from "express";
 import { adminOnly } from "../middlewares/auth.js";
-import { deleteStudent, getAllStudents, getSingleStudent, getlatestStudents, newStudent, updateStudent } from "../controllers/student.js";
+import { deleteStudent, getAllEnrolledStudent, getAllStudents, getSingleStudent, getlatestStudents, newStudent, updateStudent } from "../controllers/student.js";
 import { singleUpload } from "../middlewares/multer.js";
 
 const app = express.Router();
@@ -9,10 +9,11 @@ const app = express.Router();
 app.post("/new", adminOnly, singleUpload, newStudent);
 
 // To get all students with filters  - /api/v1/students/all  for 
-app.get("/all", adminOnly,getAllStudents);
+// app.get("/all", adminOnly,getAllStudents);
 
 //To get all admin student  - /api/v1/student/latest
 app.get("/latest",adminOnly, getlatestStudents);
+app.get("/enrolled",adminOnly, getAllEnrolledStudent);
 
 app.route("/:id")
   .get(getSingleStudent)

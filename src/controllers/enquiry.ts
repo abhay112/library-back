@@ -67,7 +67,7 @@ export const updateEnquiry = TryCatch(
   ) => {
     const adminId = req.query.id;
     const enquiryId = req.params.id; // Assuming you include the enquiryId in the route path
-    const { message } = req.body;
+    const { name,message } = req.body;
     // Validate if the enquiry exists
     const existingEnquiry = await Enquiry.findById(enquiryId);
     if (!existingEnquiry) {
@@ -75,6 +75,7 @@ export const updateEnquiry = TryCatch(
     }
     
     existingEnquiry.message = message;
+    existingEnquiry.name = name;
     await existingEnquiry.save();
     return res.status(200).json({
       success: true,
@@ -89,7 +90,7 @@ export const deleteEnquiry = TryCatch(
     next: NextFunction
   ) => {
     const adminId = req.query.id;
-    const enquiryId = req.params.id; // Assuming you include the enquiryId in the route path
+    const enquiryId = req.params.id;
 
     // Validate if the enquiry exists
     const existingEnquiry = await Enquiry.findById(enquiryId);

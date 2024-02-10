@@ -5,51 +5,64 @@ import ErrorHandler from "../utils/utility-class";
 import { rm } from "fs";
 import { Student } from "../models/student";
 import { myCache } from "../app.js";
-import {  invalidateCache } from "../utils/features.js";
+import { getCurrentDateObj, getCurrentFormattedDate, invalidateCache } from "../utils/features.js";
 import { Attendance } from "../models/attendance";
 import { User } from "../models/user";
+import { Fees } from "../models/fees";
 
 
 export const newStudent = TryCatch(
-    async (req: Request<{}, {}, NewStudentRequestBody>, res, next) => {
-      const { name, email,mobile,shift,feesAmount } = req.body;
-      const adminId = req.query.id;
-      const adminDetails =await User.findOne({_id:adminId});
-      let library = adminDetails?.library || "defaultLibrary"; 
-      const photo = req?.file;
-      if (!photo) return next(new ErrorHandler("Please add Photo", 400));
-      if (!adminId || !name || !email || !mobile) {
-        rm(photo?.path, () => {
-          console.log("Deleted");
-        });
-        return next(new ErrorHandler("Please enter All Fields", 400));
-      }
-      let newStudent= await Student.create({
-        adminId,
-        name,
-        email,
-        mobile:mobile.toString(),
-        shift,
-        feesAmount,
-        active:true,
-        library: library? library?.toLowerCase():null,
-        photo: photo?.path,
+  async (req: Request<{}, {}, NewStudentRequestBody>, res, next) => {
+    const { name, email, mobile, shift, feesAmount } = req.body;
+    const adminId = req.query.id;
+    const adminDetails = await User.findOne({ _id: adminId });
+    let library = adminDetails?.library || "defaultLibrary";
+    const photo = req?.file;
+    const { day, month, year } = getCurrentDateObj();
+    const todayDate = getCurrentFormattedDate();
+    if (!photo) return next(new ErrorHandler("Please add Photo", 400));
+    if (!adminId || !name || !email || !mobile) {
+      rm(photo?.path, () => {
+        console.log("Deleted");
       });
-      // Create an initial attendance record for the new student
-      if(newStudent){
-        await Attendance.create({
-          adminId: adminId,
-          studentId: newStudent._id, // Use the _id of the newly created student
-          studentName:newStudent.name,
-          attendance: [{ day:null, idx1: null, idx2: null, isPresent: null,seatNumber:null }],
-        });
-      }
-      invalidateCache({ student: true, admin: true, adminId: String(adminId)});
-      return res.status(201).json({
-        success: true,
-        message: "Student Created Successfully",
-      });
+      return next(new ErrorHandler("Please enter All Fields", 400));
     }
+    const mobileString = typeof mobile === "string" ? mobile : mobile.toString();
+    let newStudent = await Student.create({
+      adminId,
+      name,
+      email,
+      mobile: mobileString,
+      shift,
+      feesAmount,
+      active: true,
+      dateOfJoining: todayDate,
+      library: library ? library?.toLowerCase() : null,
+      photo: photo?.path,
+    });
+    // Create an initial attendance record for the new student
+    if (newStudent) {
+      await Attendance.create({
+        adminId: adminId,
+        studentId: newStudent._id, // Use the _id of the newly created student
+        studentName: newStudent.name,
+        attendance: [{ day: null, idx1: null, idx2: null, isPresent: null, seatNumber: null }],
+      });
+    };
+    await Fees.create({
+      adminId: adminId,
+      studentId: newStudent._id,
+      studentName: newStudent.name,
+      mobile: mobileString,
+      fees: [{ date: todayDate, day: day, month: month, year: year, amount: feesAmount, feesStatus: true, shift: shift }]
+    })
+
+    invalidateCache({ student: true, admin: true, adminId: String(adminId) });
+    return res.status(201).json({
+      success: true,
+      message: "Student Created Successfully",
+    });
+  }
 );
 
 export const getlatestStudents = TryCatch(async (req, res, next) => {
@@ -65,7 +78,7 @@ export const getlatestStudents = TryCatch(async (req, res, next) => {
   if (myCache.has(cacheKey)) {
     students = JSON.parse(myCache.get(cacheKey) as string);
   } else {
-    students = await Student.find({ adminId }).sort({ createdAt: -1 });
+    students = await Student.find({ adminId: adminId, active: true }).sort({ createdAt: -1 });
     myCache.set(cacheKey, JSON.stringify(students));
   }
 
@@ -83,7 +96,7 @@ export const getAllStudents = TryCatch(
     // 1,2,3,4,5,6,7,8
     // 9,10,11,12,13,14,15,16
     // 17,18,19,20,21,22,23,24
-    const limit =  8;
+    const limit = 8;
     const skip = (page - 1) * limit;
     const baseQuery: BaseQuery = {};
     if (search)
@@ -114,7 +127,7 @@ export const getSingleStudent = TryCatch(async (req, res, next) => {
   if (myCache.has(`student-${id}`))
     student = JSON.parse(myCache.get(`student-${id}`) as string);
   else {
-    student = await Student.findOne({ _id: id});
+    student = await Student.findOne({ _id: id });
     if (!student) return next(new ErrorHandler("student Not Found", 404));
     myCache.set(`student-${id}`, JSON.stringify(student));
   }
@@ -124,16 +137,40 @@ export const getSingleStudent = TryCatch(async (req, res, next) => {
     student,
   });
 });
+export const getAllEnrolledStudent = TryCatch(
+  async (req: Request<{}, {}, {}, SearchRequestQuery>, res, next) => {
+    let students;
+    const adminId = req.query.id;
+    if (!adminId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin ID is required in the query parameters.',
+      });
+    }
+    const cacheKey = `enrolled-students-${adminId}`;
+    if (myCache.has(cacheKey)) {
+      students = JSON.parse(myCache.get(cacheKey) as string);
+    } else {
+      students = await Student.find({ adminId: adminId, active: false }).sort({ createdAt: -1 });
+      myCache.set(cacheKey, JSON.stringify(students));
+    }
+    return res.status(200).json({
+      success: true,
+      students,
+    });
+  })
 
 export const deleteStudent = TryCatch(
   async (req, res, next) => {
-    const adminId = req.query.id; 
+    const adminId = req.query.id;
     const id = req.params.id;
     const student = await Student.findOne({ _id: id, adminId });
     if (!student) return next(new ErrorHandler("Student Not Found", 404));
     rm(student.photo!, () => {
       console.log("Student Photo Deleted");
     });
+    await Attendance.deleteOne({ studentId: student._id });
+    await Fees.deleteOne({ studentId: student._id });
     await student.deleteOne();
     invalidateCache({
       student: true,
@@ -149,10 +186,10 @@ export const deleteStudent = TryCatch(
 
 export const updateStudent = TryCatch(async (req, res, next) => {
   const { id } = req.params;
-  const adminId = req.query.id; 
-  const { name, email, mobile,shift,feesAmount,active } = req.body;
+  const adminId = req.query.id;
+  const { name, email, mobile, shift, feesAmount, dateOfJoining, active } = req.body;
   const photo = req.file;
-  const student = await Student.findOne({_id:id,adminId});
+  const student = await Student.findOne({ _id: id, adminId });
 
   if (!student) return next(new ErrorHandler("student Not Found", 404));
 
@@ -167,18 +204,19 @@ export const updateStudent = TryCatch(async (req, res, next) => {
   if (mobile) student.mobile = mobile;
   if (shift) student.shift = shift;
   if (feesAmount) student.feesAmount = Number(feesAmount);
-  let activeTrue = active ==='true';
+  let activeTrue = active === 'true';
   console.log(activeTrue);
-  if(active) student.active = activeTrue;
+  if (active) student.active = activeTrue;
+  if (dateOfJoining) student.dateOfJoining = dateOfJoining;
   // console.log("Cache keys bef update:", myCache.keys());
 
   await student.save();
-   // Invalidate cache for the list of latest students
-   invalidateCache({
+  // Invalidate cache for the list of latest students
+  invalidateCache({
     student: true,
     admin: true,
     adminId: String(adminId),
-    studentId:String(id),
+    studentId: String(id),
   });
   return res.status(200).json({
     success: true,

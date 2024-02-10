@@ -13,9 +13,8 @@ import studentRoute from "./routes/student.js";
 import contactRoute from "./routes/contact.js";
 import attendanceRoute from './routes/attendance.js'
 import seatsRoute from "./routes/seats.js";
+import feesRoute from "./routes/fees.js";
 import enquiryRoute from "./routes/enquiry.js";
-
-
 
 import { connect } from "./utils/features.js";
 
@@ -53,7 +52,7 @@ app.use("/api/v1/contact", contactRoute);
 app.use("/api/v1/attendance", attendanceRoute);
 app.use("/api/v1/seats", seatsRoute);
 app.use("/api/v1/enquiry", enquiryRoute);
-
+app.use("/api/v1/fees", feesRoute);
 
 
 

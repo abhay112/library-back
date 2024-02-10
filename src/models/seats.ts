@@ -1,8 +1,9 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
 interface ISeats extends Document {
-    matrix: number;
-    seats: number[][];
+    rows: number;
+    columns: number;
+    matrix: number[][];
     filledSeats: {
         day:string;
         idx1: number;
@@ -18,11 +19,15 @@ interface ISeats extends Document {
 
 const seatsSchema = new Schema<ISeats>(
     {
-        matrix: {
+        rows: {
             type: Number,
-            required: [true, "Please enter matrix"],
+            required: [true, "Please enter row"],
         },
-        seats: {
+        columns: {
+            type: Number,
+            required: [true, "Please enter col"],
+        },
+        matrix: {
             type: [[Number]],
             required: [true, "Please enter seats"],
         },
