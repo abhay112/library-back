@@ -4,11 +4,11 @@ import { myCache } from "../app.js";
 import { InvalidateCacheProps, OrderItemType } from "../types/types.js";
 
 // const uri = 'mongodb+srv://admin:admin@cluster1.3xsqvxd.mongodb.net/libraryDB?retryWrites=true&w=majority'
-const uri = 'mongodb+srv://admin:admin@cluster1.3xsqvxd.mongodb.net/studyPointDB?retryWrites=true&w=majority'
+// const uri = 'mongodb+srv://admin:admin@cluster1.3xsqvxd.mongodb.net/studyPointDB?retryWrites=true&w=majority'
 
-export async function connect() {
+export async function connect(mongoURI:string) {
   try {
-      await mongoose.connect(uri);
+      await mongoose.connect(mongoURI);
       console.log("Connected to MongoDB");
   } catch (error) {
       console.error("Error connecting to MongoDB:", error);
