@@ -5,7 +5,7 @@ import { createSeats, fetchSeatLayout, fetchFilledSeats } from "../controllers/s
 const app = express.Router();
 
 app.get("/fetchFilledSeats", fetchFilledSeats);
-app.get('/fetchSeatLayout',adminOnly,fetchSeatLayout)
+app.get('/fetchSeatLayout',fetchSeatLayout)
 
 //To Create New seats  - /api/v1/seats/createSeat
 app.post("/createSeats", adminOnly, createSeats);

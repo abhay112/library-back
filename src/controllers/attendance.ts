@@ -5,13 +5,17 @@ import { TryCatch } from "../middlewares/error.js";
 import Seats from "../models/seats.js";
 import ErrorHandler from "../utils/utility-class.js";
 import { Student } from "../models/student.js";
+import { User } from "../models/user.js";
 
 
 export const newAttendance = TryCatch(
   async (req, res, next) => {
     const { idx1, idx2 } = req.body;
     const {id} = req.params;
-    const findStudent = await Student.findOne({_id:id});
+    const userId = await User.findOne({_id:id});
+    const userEmail = userId?.email;
+    const findStudent = await Student.findOne({email:userEmail});
+    const StudentId =findStudent?._id;
     if(findStudent){
       const adminId = findStudent?.adminId
       const currentDate = new Date();
@@ -19,7 +23,7 @@ export const newAttendance = TryCatch(
       const fetchSeat = await Seats.findOne({ adminId: adminId });
       console.log(fetchSeat);
       const seatNumber = fetchSeat?.matrix[idx1][idx2];
-      const attendanceFound = await Attendance.findOne({ studentId: id, adminId: adminId });
+      const attendanceFound = await Attendance.findOne({ studentId: StudentId, adminId: adminId });
       const seatAlready = attendanceFound?.attendance.slice(-1)[0]?.seatNumber;
       if (seatAlready === seatNumber) {
         return res.status(201).json({
@@ -27,9 +31,9 @@ export const newAttendance = TryCatch(
           message: `Seat already taken`,
         });
       }
-      else if (attendanceFound && seatAlready !== seatNumber) { //corect this condition 
+      else if (attendanceFound && seatAlready !== seatNumber) { //correct this condition 
         await Attendance.updateOne(
-          { studentId: id },
+          { studentId: StudentId },
           {
             $addToSet: {
               attendance: { day: formattedDate, idx1, idx2, isPresent: "Pending", seatNumber: seatNumber },
@@ -52,7 +56,6 @@ export const newAttendance = TryCatch(
         message: `Student not Found for this admin`,
       });
     }
-   
   }
 );
 
@@ -62,7 +65,6 @@ export const attendanceApproved = TryCatch(
     const { id } = req.params;
     const adminId = req.query.id;
     const attendanceFound = await Attendance.findOne({ studentId: id });
-
     if (attendanceFound) {
       const latestAttendance = attendanceFound.attendance.slice(-1)[0];
       if (latestAttendance.isPresent === "Pending") {

@@ -36,11 +36,9 @@ export const createSeats = TryCatch(
     }
 );
 
-// fetch seats for current Date;
 export const fetchFilledSeats = TryCatch(
     async (req: Request<{}, {}, FetchSeatRequestBody>, res: Response, next: NextFunction) => {
-        const {id} = req.query;
-        const attendances = await Attendance.find({adminId:id});
+        const attendances = await Attendance.find();
         const currentDate = new Date();
         const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
         let result = attendances.map((attendance) => {
@@ -54,14 +52,13 @@ export const fetchFilledSeats = TryCatch(
             };
           }
         });
+        console.log(result,'filledSeats');
         result = result.filter((item) => item !== undefined);
-        console.log(result);
         const updatedSeat = await Seats.findOneAndUpdate(
-            { adminId: id },
+            { },
             { $set: { filledSeats: result } },
             { new: true }
         );
-        console.log(updatedSeat);
         return res.status(200).json({
             success: true,
             data: updatedSeat,
@@ -71,21 +68,21 @@ export const fetchFilledSeats = TryCatch(
 export const fetchSeatLayout = TryCatch(
     async (req: Request<{}, {}, FetchSeatRequestBody>, res: Response, next: NextFunction) => {
         const {id} = req.query;
-        const seatLayout = await Seats.findOne({ adminId: id });
+        const seatLayout = await Seats.findOne();
         if (!seatLayout) {
             return res.status(404).json({
                 success: false,
                 message: "Seat layout not found",
             });
         }
-        // Return seat layout data
         return res.status(200).json({
             success: true,
             data: seatLayout,
         });
         
     }
-)
+);
+
 
 
 
