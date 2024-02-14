@@ -58,12 +58,68 @@ export const getSingleEnquiries = TryCatch(
     });
   }
 );
+interface EnquiryRequestParams {
+  id: string;
+}
+// export const updateEnquiry = TryCatch(
+//   async (
+//     req: Request<{}, {}, NewEnquiryRequestBody>,
+//     res: Response,
+//     next: NextFunction
+//   ) => {
+//     const adminId = req.query.id;
+//     const enquiryId = req.params.id; // Assuming you include the enquiryId in the route path
+//     const { name,message } = req.body;
+//     // Validate if the enquiry exists
+//     const existingEnquiry = await Enquiry.findById(enquiryId);
+//     if (!existingEnquiry) {
+//       return next(new ErrorHandler("Enquiry not found", 404));
+//     }
+    
+//     existingEnquiry.message = message;
+//     existingEnquiry.name = name;
+//     await existingEnquiry.save();
+//     return res.status(200).json({
+//       success: true,
+//       message: `Enquiry updated for ${existingEnquiry.name}`,
+//     });
+//   }
+// );
+// export const deleteEnquiry = TryCatch(
+//   async (
+//     req: Request<{}, {}, NewEnquiryRequestBody>,
+//     res: Response,
+//     next: NextFunction
+//   ) => {
+//     const adminId = req.query.id;
+//     const enquiryId = req.params.id;
+
+//     // Validate if the enquiry exists
+//     const existingEnquiry = await Enquiry.findById(enquiryId);
+//     if (!existingEnquiry) {
+//       return next(new ErrorHandler("Enquiry not found", 404));
+//     }
+
+//     // Check if the existingEnquiry object is an instance of the Enquiry model
+//     if (!(existingEnquiry instanceof Enquiry)) {
+//       return next(new ErrorHandler("Invalid enquiry object", 500));
+//     }
+
+//     // Delete the enquiry
+//     await existingEnquiry.deleteOne();
+
+//     return res.status(200).json({
+//       success: true,
+//       message: `Enquiry deleted for ${existingEnquiry.name}`,
+//     });
+//   }
+// );
 
 export const updateEnquiry = TryCatch(
   async (
-    req: Request<{}, {}, NewEnquiryRequestBody>,
-    res: Response,
-    next: NextFunction
+    req,
+    res,
+    next
   ) => {
     const adminId = req.query.id;
     const enquiryId = req.params.id; // Assuming you include the enquiryId in the route path
@@ -85,9 +141,7 @@ export const updateEnquiry = TryCatch(
 );
 export const deleteEnquiry = TryCatch(
   async (
-    req: Request<{}, {}, NewEnquiryRequestBody>,
-    res: Response,
-    next: NextFunction
+    req,res,next
   ) => {
     const adminId = req.query.id;
     const enquiryId = req.params.id;
