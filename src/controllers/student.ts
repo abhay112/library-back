@@ -7,15 +7,15 @@ import { Student } from "../models/student";
 import { myCache } from "../app.js";
 import { getCurrentDateObj, getCurrentFormattedDate, invalidateCache } from "../utils/features.js";
 import { Attendance } from "../models/attendance";
-import { User } from "../models/user";
 import { Fees } from "../models/fees";
+import { Admin } from "../models/admin";
 
 
 export const newStudent = TryCatch(
   async (req: Request<{}, {}, NewStudentRequestBody>, res, next) => {
     const { name, email, mobile, shift, feesAmount } = req.body;
     const adminId = req.query.id;
-    const adminDetails = await User.findOne({ _id: adminId });
+    const adminDetails = await Admin.findOne({ _id: adminId });
     let library = adminDetails?.library || "defaultLibrary";
     const photo = req?.file;
     const { day, month, year } = getCurrentDateObj();

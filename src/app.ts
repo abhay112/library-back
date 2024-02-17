@@ -8,6 +8,7 @@ import mongoose, { Document } from "mongoose";
 import { errorMiddleware } from "./middlewares/error.js";
 
 // Importing Routes
+import adminRoute from "./routes/admin.js";
 import userRoute from "./routes/user.js";
 import studentRoute from "./routes/student.js";
 import contactRoute from "./routes/contact.js";
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
 
 
 // Using Routes
+app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/student", studentRoute);
 app.use("/api/v1/contact", contactRoute);
