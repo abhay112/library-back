@@ -14,8 +14,10 @@
   "license": "ISC",
   "dependencies": {
     "@faker-js/faker": "^8.4.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/faker": "^6.6.9",
     "@types/request-ip": "^0.0.41",
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
