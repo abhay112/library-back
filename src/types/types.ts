@@ -45,6 +45,9 @@ export interface NewQueryRequestBody {
   library:string;
   location:string;
   _id: string;
+};
+export interface NewPdfReuestBody{
+  name:string;
 }
 export interface NewEnquiryRequestBody {
   name: string;
