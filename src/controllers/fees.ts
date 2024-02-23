@@ -15,24 +15,23 @@ export const getCurrentMonthFees = TryCatch(async (req: Request, res: Response, 
     const activeStudents = await Student.find({ adminId: adminId, active: true });
     const activeStudentIds = activeStudents.map(student => String(student._id));
     console.log(activeStudentIds)
-
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1; 
+    const currentMonth = currentDate.getMonth() + 1;
     // const fees = await Fees.find({ adminId: adminId });
     const aggregatedFees = await Fees.aggregate([
         {
-          $match: {
-            adminId: adminId,
-            studentId: { $in: activeStudentIds }
-          }
+            $match: {
+                adminId: adminId,
+                studentId: { $in: activeStudentIds }
+            }
         }
-      ]);
-      console.log(aggregatedFees)
-      
+    ]);
+    console.log(aggregatedFees)
+
     for (const fee of aggregatedFees) {
-        const {amount,feesStatus,shift} = fee.fees.slice(-1)[0]
-        const {day,month,year} = getCurrentDateObj()
+        const { amount, feesStatus, shift } = fee.fees.slice(-1)[0]
+        const { day, month, year } = getCurrentDateObj()
         const feeDateParts = fee.fees.slice(-1)[0].date.split('/');
         const feeDay = parseInt(feeDateParts[0], 10);
         const feeMonth = parseInt(feeDateParts[1], 10) - 1; // Months are zero-indexed
@@ -61,4 +60,28 @@ export const getCurrentMonthFees = TryCatch(async (req: Request, res: Response, 
         currentFees,
     });
 });
+export const getUserFees = TryCatch(async (req, res, next) => {
+    const _id = req.params.id;
+    try {
+        const fees = await Fees.find({_id});
+        if (!fees) {
+            return res.status(404).json({
+                success: false,
+                message: 'Fees not found for the specified studentId.',
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            fees,
+        });
+    } catch (error) {
+        console.error('Error fetching fees:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            // error: error.message,
+        });
+    }
+})
+
 
