@@ -11,6 +11,8 @@ interface AttendanceDocument extends Document {
             idx2:Number,
             isPresent:string,
             seatNumber:string,
+            checkIn:string;
+            checkOut:string;
         }
     ];
     studentName:string;

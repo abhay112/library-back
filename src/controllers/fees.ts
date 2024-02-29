@@ -18,7 +18,6 @@ export const getCurrentMonthFees = TryCatch(async (req: Request, res: Response, 
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth() + 1;
-    // const fees = await Fees.find({ adminId: adminId });
     const aggregatedFees = await Fees.aggregate([
         {
             $match: {
@@ -30,24 +29,24 @@ export const getCurrentMonthFees = TryCatch(async (req: Request, res: Response, 
     console.log(aggregatedFees)
 
     for (const fee of aggregatedFees) {
-        const { amount, feesStatus, shift } = fee.fees.slice(-1)[0]
+        const { amount, feesStatus, shift } = fee?.fees?.slice(-1)[0]
         const { day, month, year } = getCurrentDateObj()
+        // const feeDateParts = fee.feesSubmissionDate.split('/');
         const feeDateParts = fee.fees.slice(-1)[0].date.split('/');
         const feeDay = parseInt(feeDateParts[0], 10);
         const feeMonth = parseInt(feeDateParts[1], 10) - 1; // Months are zero-indexed
         const feeYear = parseInt(feeDateParts[2], 10);
-
-        // Construct a Date object from the components
         const feeDate = new Date(feeYear, feeMonth, feeDay);
-
-        // Calculate the difference in days
         const diffMilliseconds = currentDate.getTime() - feeDate.getTime();
         const diffDays = Math.ceil(diffMilliseconds / (1000 * 60 * 60 * 24));
-
         if (diffDays >= 30 && feeMonth !== currentMonth) {
             await Fees.updateOne(
                 { _id: fee._id },
-                { $addToSet: { fees: { date: getCurrentFormattedDate(), day, month, year, amount, feesStatus: false, shift } } }
+                {$addToSet: { fees: { date: getCurrentFormattedDate(), day, month, year, feesStatus: false, amount, shift } }},
+            );
+            await Fees.updateOne(
+                { _id: fee._id },
+                {$set: { feesStatus: false }}
             );
         }
     }
@@ -63,7 +62,7 @@ export const getCurrentMonthFees = TryCatch(async (req: Request, res: Response, 
 export const getUserFees = TryCatch(async (req, res, next) => {
     const _id = req.params.id;
     try {
-        const fees = await Fees.find({_id});
+        const fees = await Fees.find({ _id });
         if (!fees) {
             return res.status(404).json({
                 success: false,
@@ -79,9 +78,35 @@ export const getUserFees = TryCatch(async (req, res, next) => {
         return res.status(500).json({
             success: false,
             message: 'Internal server error',
-            // error: error.message,
         });
     }
 })
 
-
+export const submitDueFees = TryCatch(async (req,res, next) => {
+    const  _id = req.params.id;
+    try {
+        const fee = await Fees.findById(_id);
+        if (!fee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Fees not found for the specified _id.',
+            });
+        }
+        console.log(fee);
+        await Fees.updateOne(
+            { _id: _id },
+            { $set: { 'fees.$[elem].date': getCurrentFormattedDate(), 'fees.$[elem].feesStatus': true } },
+            { arrayFilters: [{ 'elem.feesStatus': false }] }
+        );
+        return res.status(200).json({
+            success: true,
+            message: 'Due fees submitted successfully.',
+        });
+    } catch (error) {
+        console.error('Error submitting due fees:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+});

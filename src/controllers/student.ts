@@ -20,6 +20,7 @@ export const newStudent = TryCatch(
     const photo = req?.file;
     const { day, month, year } = getCurrentDateObj();
     const todayDate = getCurrentFormattedDate();
+    const tempTodayDate = "25/1/2024"
     if (!photo) return next(new ErrorHandler("Please add Photo", 400));
     if (!adminId || !name || !email || !mobile) {
       rm(photo?.path, () => {
@@ -46,7 +47,7 @@ export const newStudent = TryCatch(
         adminId: adminId,
         studentId: newStudent._id, // Use the _id of the newly created student
         studentName: newStudent.name,
-        attendance: [{ day: null, idx1: null, idx2: null, isPresent: null, seatNumber: null }],
+        attendance: [{ day: null, idx1: null, idx2: null, isPresent: null, seatNumber: null,checkIn:null,checkOut:null }],
       });
     };
     await Fees.create({
@@ -54,7 +55,8 @@ export const newStudent = TryCatch(
       studentId: newStudent._id,
       studentName: newStudent.name,
       mobile: mobileString,
-      fees: [{ date: todayDate, day: day, month: month, year: year, amount: feesAmount, feesStatus: true, shift: shift }]
+      feesSubmissionDate:tempTodayDate,
+      fees: [{ date: tempTodayDate, day: day, month: month, year: year, amount: feesAmount, feesStatus:true, shift: shift }]
     })
 
     invalidateCache({ student: true, admin: true, adminId: String(adminId) });

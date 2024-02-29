@@ -6,6 +6,8 @@ import {
     getPresentStudent,
     getPendingAttendance,
     getStudentAllAttendance,
+    getStudentTodayAttendanceAndSeatNumber,
+    checkOutFromLibrary,
 } from "../controllers/attendance.js";
 import { adminOnly } from "../middlewares/auth.js";
 
@@ -18,11 +20,12 @@ app.get('/getPresentStudent',adminOnly,getPresentStudent);
 app.get('/getPendingAttendance',adminOnly,getPendingAttendance);
 
 app.get("/:id",getStudentAllAttendance);
+app.get("/isPresent/:id",getStudentTodayAttendanceAndSeatNumber);
 
 // app.put("/attendanceApprove",adminOnly,attendanceApproved);
 app.put("/attendanceApprove/:id", adminOnly, attendanceApproved);
 
-
+app.put("/checkOut/:id",checkOutFromLibrary);
 app.post("/:id",newAttendance);
 
 export default app;

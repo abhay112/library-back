@@ -19,19 +19,20 @@ export const newAttendance = TryCatch(
     if(findStudent){
       const adminId = findStudent?.adminId
       const currentDate = new Date();
+      const outTime = currentDate.toLocaleTimeString();
       const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
       const fetchSeat = await Seats.findOne({ adminId: adminId });
-      console.log(fetchSeat);
       const seatNumber = fetchSeat?.matrix[idx1][idx2];
       const attendanceFound = await Attendance.findOne({ studentId: StudentId, adminId: adminId });
+      console.log(attendanceFound?.attendance);
       const seatAlready = attendanceFound?.attendance.slice(-1)[0]?.seatNumber;
-      if (seatAlready === seatNumber) {
-        return res.status(201).json({
-          success: false,
-          message: `Seat already taken`,
-        });
-      }
-      else if (attendanceFound && seatAlready !== seatNumber) { //correct this condition 
+      // if (seatAlready === seatNumber) {
+      //   return res.status(201).json({
+      //     success: false,
+      //     message: `Seat already taken`,
+      //   });
+      // }
+      if (attendanceFound && seatAlready !== seatNumber) { //correct this condition 
         await Attendance.updateOne(
           { studentId: StudentId },
           {
@@ -67,12 +68,15 @@ export const attendanceApproved = TryCatch(
     const attendanceFound = await Attendance.findOne({ studentId: id });
     if (attendanceFound) {
       const latestAttendance = attendanceFound.attendance.slice(-1)[0];
+      console.log(latestAttendance);
+      const currentDate = new Date();
+      const inTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       if (latestAttendance.isPresent === "Pending") {
         await Attendance.updateOne(
           {
             studentId: id,
           },
-          { $set: { 'attendance.$[elem].isPresent': 'Present' } },
+          { $set: { 'attendance.$[elem].isPresent': 'Present','attendance.$[elem].checkIn': inTime } },
           { arrayFilters: [{ 'elem.day': latestAttendance.day }] }
         );
 
@@ -94,48 +98,6 @@ export const attendanceApproved = TryCatch(
     }
   }
 );
-
-//it will return all student that are present and their attendace pending 
-// export const getAllStudentTodayAttendance = TryCatch(
-//   async (
-//     req: Request<{}, {}, NewAttendanceRequestBody>,
-//     res: Response,
-//     next: NextFunction
-//   ) => {
-//     const adminId = req.query.id
-//     const attendances = await Attendance.find({ adminId: adminId });
-//     const currentDate = new Date();
-//     const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
-
-//     let result = attendances.map((attendance) => {
-//       const { studentId, adminId, studentName } = attendance;
-//       const latestAttendance = attendance.attendance[attendance.attendance.length - 1];
-//       if (latestAttendance.day === formattedDate) {
-//         return {
-//           studentId,
-//           adminId,
-//           studentName,
-//           latestAttendance,
-//         };
-//       } else {
-//         return {
-//           studentId,
-//           adminId,
-//           studentName,
-//           latestAttendance: { day: formattedDate, idx1: null, idx2: null, isPresent: "Not Present",seatNumber:null },
-//         };
-//       }
-//     });
-
-//     // Filter out undefined results
-//     result = result.filter((item) => item !== undefined);
-
-//     return res.status(200).json({
-//       success: true,
-//       data: result,
-//     });
-//   }
-// );
 
 export const getAllStudentTodayAttendance = TryCatch(
   async (
@@ -205,7 +167,102 @@ export const getStudentAllAttendance = TryCatch(
         message: "attendancne not found",
       });
     }
-  })
+});
+
+export const getStudentTodayAttendanceAndSeatNumber = TryCatch(
+  async (req, res, next) => {
+    const userId = req.params.id;
+    const user = await User.findOne({_id:userId});
+    let userEmail;
+    let studentId;
+    if(user){
+      userEmail = user?.email;
+      const student = await Student.findOne({email:userEmail});
+      if(student){
+        studentId=student?._id;
+      }else{
+        return res.status(201).json({
+          success: false,
+          message:"Student Not Found"
+        });
+      }
+      const attendance = await Attendance.findOne({ studentId: studentId });
+      if(attendance){
+        const latestAttendance = attendance.attendance[attendance.attendance.length - 1];
+        const currentDate = new Date();
+        const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
+        if(formattedDate === latestAttendance.day){
+          return res.status(200).json({
+            success: true,
+            data: latestAttendance,
+          });
+        }
+        return res.status(201).json({
+          success: false,
+          message:"Today Attendance not found"
+        });
+      }
+    }
+    else{
+      //retrun err
+      return res.status(201).json({
+        success: false,
+        message:"User Not Found"
+      });
+    }
+  }
+);
+export const checkOutFromLibrary = TryCatch(
+  async (req, res, next) => {
+    const userId = req.params.id;
+    const user = await User.findOne({ _id: userId });
+    let userEmail;
+    let studentId;
+    if (user) {
+      userEmail = user?.email;
+      const student = await Student.findOne({ email: userEmail });
+      if (student) {
+        studentId = student?._id;
+      } else {
+        return res.status(201).json({
+          success: false,
+          message: "Student Not Found"
+        });
+      }
+      const attendance = await Attendance.findOne({ studentId: studentId });
+      if (attendance) {
+        const latestAttendance = attendance.attendance[attendance.attendance.length - 1];
+        const currentDate = new Date();
+        const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
+        if (formattedDate === latestAttendance.day) {
+          const checkOutTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          latestAttendance.checkOut = checkOutTime; 
+          await Attendance.updateOne(
+            {
+              studentId: studentId,
+            },
+            { $set: { 'attendance.$[elem].isPresent': 'Exit','attendance.$[elem].checkOut': checkOutTime } },
+            { arrayFilters: [{ 'elem.day': latestAttendance.day }] }
+          );
+          return res.status(200).json({
+            success: true,
+            data: latestAttendance,
+          });
+        }
+        return res.status(201).json({
+          success: false,
+          message: "Today Attendance not found"
+        });
+      }
+    } else {
+      return res.status(201).json({
+        success: false,
+        message: "User Not Found"
+      });
+    }
+  }
+);
+
 
 
 // this only return present student
@@ -223,7 +280,7 @@ export const getPresentStudent = TryCatch(
       const currentDate = new Date();
       const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
       // Remove the semicolon after the condition
-      if (latestAttendance.isPresent === "Present" && latestAttendance.day === formattedDate) {
+      if ((latestAttendance.isPresent === "Present" ||  latestAttendance.isPresent === "Pending"||latestAttendance.isPresent === "Exit") && latestAttendance.day === formattedDate) {
         return {
           studentId,
           adminId,
