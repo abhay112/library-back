@@ -1,50 +1,91 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
+
+interface FeeDetail {
+  date: string;
+  amount: number;
+  feesStatus: boolean;
+  shift: 'morning' | 'afternoon' | 'evening' | 'full_day';
+}
 
 interface FeesDocument extends Document {
-    adminId: string;
-    studentId: string;
-    studentName:string;
-    mobile:string;
-    fees: [
-        {
-            date:string,
-            day:string,
-            month:string,
-            year:number,
-            amount:number,
-            feesStatus:boolean,
-            shift:string;
-        }
-    ];
-  }
+  adminId: mongoose.Schema.Types.ObjectId; // Reference to Admin
+  studentId: mongoose.Schema.Types.ObjectId; // Reference to Student
+  studentName: string;
+  mobile: string;
+  feesSubmissionDate: Date;
+  feesDueDate: Date;
+  fees: FeeDetail[];
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-const schema = new mongoose.Schema(
+const FeeDetailSchema = new mongoose.Schema(
   {
-    adminId: {
+    date: {
       type: String,
-      required: [true, "Please provide admin Id"],
+      required: [true, "Please enter date"],
     },
-    studentId: {
+    amount: {
+      type: Number,
+      required: [true, "Please enter amount"],
+    },
+    feesStatus: {
+      type: Boolean,
+      required: [true, "Please specify fees status"],
+    },
+    shift: {
       type: String,
-      required: [true, "Please provide student Name"],
+      enum: ['morning', 'afternoon', 'evening', 'full_day'],
+      required: [true, "Please specify the shift"],
     },
-    studentName:{
-      type:String,
-      required:[true,"Please enter Student Name"]
-    },
-    mobile: {
-      type: String,
-      required: [true, "Please enter Mobile Number"],
-    },
-    fees: {
-      type: Object,
-      required: [true, "Please enter attendance"],
-    },
-
   },
   {
-    timestamps: true,
+    _id: false, // Prevent the creation of an _id field for each fee detail
   }
 );
 
-export const Fees = mongoose.model<FeesDocument>("Fees", schema);
+const FeesSchema = new mongoose.Schema(
+  {
+    adminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      required: [true, "Please provide admin ID"],
+    },
+    studentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Student",
+      required: [true, "Please provide student ID"],
+    },
+    studentName: {
+      type: String,
+      required: [true, "Please enter student name"],
+    },
+    feesSubmissionDate: {
+      type: Date,
+      required: [true, "Please enter fees submission date"],
+    },
+    feesDueDate: {
+      type: Date,
+      required: false,
+    },
+    fees: {
+      type: [FeeDetailSchema],
+      required: [true, "Please enter fees details"],
+    },
+  },
+  {
+    timestamps: true, // Adds createdAt and updatedAt fields
+  }
+);
+
+// Pre-save hook to calculate feesDueDate
+FeesSchema.pre<FeesDocument>('save', function(next) {
+  if (this.feesSubmissionDate) {
+    const submissionDate = this.feesSubmissionDate as Date;
+    const dueDate = new Date(submissionDate);
+    dueDate.setMonth(submissionDate.getMonth() + 1);
+    this.feesDueDate = dueDate;
+  }
+  next();
+});
+export const Fees = mongoose.model<FeesDocument>("Fees", FeesSchema);

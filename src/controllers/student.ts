@@ -37,7 +37,7 @@ export const newStudent = TryCatch(
       feesAmount,
       active: true,
       dateOfJoining: todayDate,
-      library: library ? library?.toLowerCase() : null,
+      // library: library ? library?.toLowerCase() : null,
       photo: photo?.path,
     });
     // Create an initial attendance record for the new student
@@ -203,7 +203,7 @@ export const updateStudent = TryCatch(async (req, res, next) => {
   if (email) student.email = email;
   if (mobile) student.mobile = mobile;
   if (shift) student.shift = shift;
-  if (feesAmount) student.feesAmount = Number(feesAmount);
+  // if (feesAmount) student.feesAmount = Number(feesAmount);
   let activeTrue = active === 'true';
   console.log(activeTrue);
   if (active) student.active = activeTrue;

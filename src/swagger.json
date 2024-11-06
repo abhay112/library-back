@@ -1,0 +1,939 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Admin API",
+    "version": "1.0.0",
+    "description": "API for managing admins"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1/"
+    }
+  ],
+  "paths": {
+    "/admin-routes/library": {
+        "post": {
+          "summary": "Create a new library",
+          "tags": ["Library"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "address": { "type": "string" },
+                    "pincode": { "type": "integer" },
+                    "students": {
+                      "type": "array",
+                      "items": { "type": "string", "format": "objectId" }
+                    },
+                    "admins": {
+                      "type": "array",
+                      "items": { "type": "string", "format": "objectId" }
+                    }
+                  },
+                  "required": ["name", "address", "pincode"]
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "name": "Central Library",
+                      "address": "123 Main St, Springfield",
+                      "pincode": 123456,
+                      "students": [],
+                      "admins": []
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "Library created successfully",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": { "type": "boolean" },
+                        "message": { "type": "string" },
+                        "library": { "$ref": "#/components/schemas/Library" }
+                      }
+                    },
+                    "examples": {
+                      "example1": {
+                        "value": {
+                          "success": true,
+                          "message": "Library created successfully: Central Library",
+                          "library": {
+                            "_id": "60d0fe4f5311236168a109cb",
+                            "name": "Central Library",
+                            "address": "123 Main St, Springfield",
+                            "pincode": 123456,
+                            "students": [],
+                            "admins": [],
+                            "createdAt": "2021-06-22T14:20:00.000Z",
+                            "updatedAt": "2021-06-22T14:20:00.000Z"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "400": {
+                "description": "Bad request",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": { "type": "boolean" },
+                        "message": { "type": "string" },
+                        "statusCode": { "type": "integer" }
+                      }
+                    },
+                    "examples": {
+                      "example1": {
+                        "value": {
+                          "success": false,
+                          "message": "Please add all required fields",
+                          "statusCode": 400
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "409": {
+                "description": "Library with this ID already exists",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": { "type": "boolean" },
+                        "message": { "type": "string" },
+                        "statusCode": { "type": "integer" }
+                      }
+                    },
+                    "examples": {
+                      "example1": {
+                        "value": {
+                          "success": false,
+                          "message": "Library with this ID already exists",
+                          "statusCode": 409
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "get": {
+            "summary": "Fetch the list of libraries",
+            "tags": ["Library"],
+            "responses": {
+              "200": {
+                "description": "List of libraries",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": { "type": "boolean" },
+                        "message": { "type": "string" },
+                        "libraries": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Library" }
+                        }
+                      }
+                    },
+                    "examples": {
+                      "example1": {
+                        "value": {
+                          "success": true,
+                          "message": "List of libraries fetched successfully",
+                          "libraries": [
+                            {
+                              "_id": "60d0fe4f5311236168a109cb",
+                              "name": "Central Library",
+                              "address": "123 Main St, Springfield",
+                              "pincode": 123456,
+                              "students": [],
+                              "admins": [],
+                              "createdAt": "2021-06-22T14:20:00.000Z",
+                              "updatedAt": "2021-06-22T14:20:00.000Z"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "404": {
+                "description": "No libraries found",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": { "type": "boolean" },
+                        "message": { "type": "string" },
+                        "statusCode": { "type": "integer" }
+                      }
+                    },
+                    "examples": {
+                      "example1": {
+                        "value": {
+                          "success": false,
+                          "message": "No libraries found",
+                          "statusCode": 404
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/library/{id}": {
+          "get": {
+            "summary": "Fetch a single library by ID",
+            "tags": ["Library"],
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "description": "ID of the library to fetch",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Library found",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": { "type": "boolean" },
+                        "message": { "type": "string" },
+                        "library": { "$ref": "#/components/schemas/Library" }
+                      }
+                    },
+                    "examples": {
+                      "example1": {
+                        "value": {
+                          "success": true,
+                          "message": "Library found",
+                          "library": {
+                            "_id": "60d0fe4f5311236168a109cb",
+                            "name": "Central Library",
+                            "address": "123 Main St, Springfield",
+                            "pincode": 123456,
+                            "students": [],
+                            "admins": [],
+                            "createdAt": "2021-06-22T14:20:00.000Z",
+                            "updatedAt": "2021-06-22T14:20:00.000Z"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "404": {
+                "description": "Library not found",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": { "type": "boolean" },
+                        "message": { "type": "string" },
+                        "statusCode": { "type": "integer" }
+                      }
+                    },
+                    "examples": {
+                      "example1": {
+                        "value": {
+                          "success": false,
+                          "message": "Library not found",
+                          "statusCode": 404
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "put": {
+            "summary": "Update a library by ID",
+            "tags": ["Library"],
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "description": "ID of the library to update",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "address": { "type": "string" },
+                      "pincode": { "type": "integer" },
+                      "students": {
+                        "type": "array",
+                        "items": { "type": "string", "format": "objectId" }
+                      },
+                      "admins": {
+                        "type": "array",
+                        "items": { "type": "string", "format": "objectId" }
+                      }
+                    }
+                  },
+                  "examples": {
+                    "example1": {
+                      "value": {
+                        "name": "Updated Library Name",
+                        "address": "456 Secondary St, Springfield",
+                        "pincode": 654321,
+                        "students": [],
+                        "admins": []
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Library updated successfully",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": { "type": "boolean" },
+                          "message": { "type": "string" },
+                          "library": { "$ref": "#/components/schemas/Library" }
+                        }
+                      },
+                      "examples": {
+                        "example1": {
+                          "value": {
+                            "success": true,
+                            "message": "Library updated successfully: Updated Library Name",
+                            "library": {
+                              "_id": "60d0fe4f5311236168a109cb",
+                              "name": "Updated Library Name",
+                              "address": "456 Secondary St, Springfield",
+                              "pincode": 654321,
+                              "students": [],
+                              "admins": [],
+                              "createdAt": "2021-06-22T14:20:00.000Z",
+                              "updatedAt": "2021-06-22T14:20:00.000Z"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "description": "Bad request",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": { "type": "boolean" },
+                          "message": { "type": "string" },
+                          "statusCode": { "type": "integer" }
+                        }
+                      },
+                      "examples": {
+                        "example1": {
+                          "value": {
+                            "success": false,
+                            "message": "Library not found",
+                            "statusCode": 404
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "404": {
+                  "description": "Library not found",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": { "type": "boolean" },
+                          "message": { "type": "string" },
+                          "statusCode": { "type": "integer" }
+                        }
+                      },
+                      "examples": {
+                        "example1": {
+                          "value": {
+                            "success": false,
+                            "message": "Library not found",
+                            "statusCode": 404
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "delete": {
+              "summary": "Delete a library by ID",
+              "tags": ["Library"],
+              "parameters": [
+                {
+                  "name": "id",
+                  "in": "path",
+                  "required": true,
+                  "description": "ID of the library to delete",
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "responses": {
+                "204": {
+                  "description": "Library deleted successfully"
+                },
+                "404": {
+                  "description": "Library not found",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": { "type": "boolean" },
+                          "message": { "type": "string" },
+                          "statusCode": { "type": "integer" }
+                        }
+                      },
+                      "examples": {
+                        "example1": {
+                          "value": {
+                            "success": false,
+                            "message": "Library not found",
+                            "statusCode": 404
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+    },
+    "/admin-routes/admins": {
+      "post": {
+        "summary": "Create a new admin",
+        "tags": ["Admins"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "library": { "type": "string" }
+                },
+                "required": ["name", "email", "password", "library"]
+              },
+              "examples": {
+                "example1": {
+                  "value": {
+                    "name": "John Doe",
+                    "email": "john@example.com",
+                    "password": "securepassword123",
+                    "library": "60d0fe4f5311236168a109ca"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Admin created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": { "$ref": "#/components/schemas/Admin" },
+                    "statusCode": { "type": "integer" }
+                  }
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "success": true,
+                      "message": "Admin created successfully, welcome John Doe",
+                      "data": {
+                        "_id": "60d0fe4f5311236168a109cb",
+                        "name": "John Doe",
+                        "email": "john@example.com",
+                        "library": "60d0fe4f5311236168a109ca",
+                        "createdAt": "2021-06-22T14:20:00.000Z",
+                        "updatedAt": "2021-06-22T14:20:00.000Z"
+                      },
+                      "statusCode": 201
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "statusCode": { "type": "integer" }
+                  }
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "success": false,
+                      "message": "Please add all fields",
+                      "statusCode": 400
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "statusCode": { "type": "integer" }
+                  }
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "success": false,
+                      "message": "Email already registered",
+                      "statusCode": 409
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Fetch the list of admins",
+        "tags": ["Admins"],
+        "responses": {
+          "200": {
+            "description": "List of admins",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Admin" }
+                    }
+                  }
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "success": true,
+                      "message": "List of admins fetched successfully",
+                      "data": [
+                        {
+                          "_id": "60d0fe4f5311236168a109cb",
+                          "name": "John Doe",
+                          "email": "john@example.com",
+                          "library": "60d0fe4f5311236168a109ca",
+                          "createdAt": "2021-06-22T14:20:00.000Z",
+                          "updatedAt": "2021-06-22T14:20:00.000Z"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No admins found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "statusCode": { "type": "integer" }
+                  }
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "success": false,
+                      "message": "No admins found",
+                      "statusCode": 404
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin-routes/admins/{id}": {
+      "get": {
+        "summary": "Fetch a single admin by ID",
+        "tags": ["Admins"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the admin to fetch",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": { "$ref": "#/components/schemas/Admin" }
+                  }
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "success": true,
+                      "message": "Admin found",
+                      "data": {
+                        "_id": "60d0fe4f5311236168a109cb",
+                        "name": "John Doe",
+                        "email": "john@example.com",
+                        "library": "60d0fe4f5311236168a109ca",
+                        "createdAt": "2021-06-22T14:20:00.000Z",
+                        "updatedAt": "2021-06-22T14:20:00.000Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Admin not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "statusCode": { "type": "integer" }
+                  }
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "success": false,
+                      "message": "Admin not found",
+                      "statusCode": 404
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an admin by ID",
+        "tags": ["Admins"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the admin to update",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "library": { "type": "string" }
+                }
+              },
+              "examples": {
+                "example1": {
+                  "value": {
+                    "name": "John Updated",
+                    "email": "john.updated@example.com",
+                    "password": "newsecurepassword123",
+                    "library": "60d0fe4f5311236168a109ca"
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Admin updated successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "boolean" },
+                      "message": { "type": "string" },
+                      "data": { "$ref": "#/components/schemas/Admin" }
+                    }
+                  },
+                  "examples": {
+                    "example1": {
+                      "value": {
+                        "success": true,
+                        "message": "Admin updated successfully",
+                        "data": {
+                          "_id": "60d0fe4f5311236168a109cb",
+                          "name": "John Updated",
+                          "email": "john.updated@example.com",
+                          "library": "60d0fe4f5311236168a109ca",
+                          "createdAt": "2021-06-22T14:20:00.000Z",
+                          "updatedAt": "2021-06-22T14:20:00.000Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "boolean" },
+                      "message": { "type": "string" },
+                      "statusCode": { "type": "integer" }
+                    }
+                  },
+                  "examples": {
+                    "example1": {
+                      "value": {
+                        "success": false,
+                        "message": "Please add all fields",
+                        "statusCode": 400
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Admin not found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "boolean" },
+                      "message": { "type": "string" },
+                      "statusCode": { "type": "integer" }
+                    }
+                  },
+                  "examples": {
+                    "example1": {
+                      "value": {
+                        "success": false,
+                        "message": "Admin not found",
+                        "statusCode": 404
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Email already registered",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "boolean" },
+                      "message": { "type": "string" },
+                      "statusCode": { "type": "integer" }
+                    }
+                  },
+                  "examples": {
+                    "example1": {
+                      "value": {
+                        "success": false,
+                        "message": "Email already registered",
+                        "statusCode": 409
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete an admin by ID",
+          "tags": ["Admins"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID of the admin to delete",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Admin deleted successfully"
+            },
+            "404": {
+              "description": "Admin not found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "boolean" },
+                      "message": { "type": "string" },
+                      "statusCode": { "type": "integer" }
+                    }
+                  },
+                  "examples": {
+                    "example1": {
+                      "value": {
+                        "success": false,
+                        "message": "Admin not found",
+                        "statusCode": 404
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Library": {
+          "type": "object",
+          "properties": {
+            "_id": { "type": "string" },
+            "name": { "type": "string" },
+            "address": { "type": "string" },
+            "pincode": { "type": "integer" },
+            "students": {
+              "type": "array",
+              "items": { "type": "string", "format": "objectId" }
+            },
+            "admins": {
+              "type": "array",
+              "items": { "type": "string", "format": "objectId" }
+            },
+            "createdAt": { "type": "string", "format": "date-time" },
+            "updatedAt": { "type": "string", "format": "date-time" }
+          }
+      },
+      "Admin": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "library": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

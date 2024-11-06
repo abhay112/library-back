@@ -1,7 +1,45 @@
 import mongoose from "mongoose";
 import validator from "validator";
 
-const schema = new mongoose.Schema(
+interface IMembershipPeriod {
+  startDate: Date;
+  endDate?: Date; // `endDate` is optional because the student might still be active
+  isActive: boolean;
+}
+
+interface IStudent extends Document {
+  name: string;
+  email: string;
+  mobile: number;
+  photo: string;
+  shift: string;
+  fixedSeatNumber: string;
+  dateOfJoining?: string;
+  feesId: mongoose.Schema.Types.ObjectId;
+  libraryId: mongoose.Schema.Types.ObjectId; // Reference to Library
+  adminId: mongoose.Schema.Types.ObjectId; // Reference to Admin
+  attendance: mongoose.Schema.Types.ObjectId[];
+  active?: boolean;
+  membershipHistory: IMembershipPeriod[]; // Array to track membership periods
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const MembershipPeriodSchema = new mongoose.Schema({
+  startDate: {
+    type: Date,
+    required: true,
+  },
+  endDate: {
+    type: Date,
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+});
+
+const StudentSchema = new mongoose.Schema(
   {
     adminId:{
       type:String,
@@ -23,32 +61,49 @@ const schema = new mongoose.Schema(
     },
     photo: {
       type: String,
-      required: [true, "Please enter Photo"],
+      required: false,
     },
     shift:{ //leter it modify to dropdown meny
       type:String, 
       required: [true, "Please enter Shift"],
     },
-    feesAmount:{
-      type:Number,
-      required:[false,"Please enter Monthly Fees"]
+    fixedSeatNumber: {
+      type: Number,
+      required: false,
     },
-    library: {
-      type: String,
-      required:false,
-    },
-    dateOfJoining:{
-      type:String,
-      required:false,
-    },
-    attendance: {
+    dateOfJoining: {
       type: String,
       required: false,
     },
-    active:{
-      type:Boolean,
-      required:false,
-    }
+    feesId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Fees",
+      required: false,
+    },
+    libraryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Library",
+      required: true,
+    },
+    adminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      required: true,
+    },
+    attendance: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Attendance",
+      },
+    ],
+    active: {
+      type: Boolean,
+      default: true,
+    },
+    membershipHistory: {
+      type: [MembershipPeriodSchema], // Array of membership periods
+      default: [],
+    },
   },
   {
     timestamps: true,

@@ -6,6 +6,15 @@ export interface NewUserRequestBody {
   photo: string;
   _id: string;
 }
+
+
+export interface NewAdminRequestBody {
+  name:string;
+  email: string;
+  password:string;
+  library:string;
+  _id: string;
+}
 export interface NewSeatRequestBody {
   rows:number;
   columns:number;
