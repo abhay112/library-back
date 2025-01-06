@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { Document } from 'mongoose';
 import validator from "validator";
 
 interface IUser extends Document {

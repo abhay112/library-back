@@ -66,7 +66,9 @@ export const updateEnquiry = TryCatch(
     next: NextFunction
   ) => {
     const adminId = req.query.id;
-    const enquiryId = req.params.id; // Assuming you include the enquiryId in the route path
+    // const enquiryId = req.params.id; 
+    const enquiryId =  1;
+
     const { name,message } = req.body;
     // Validate if the enquiry exists
     const existingEnquiry = await Enquiry.findById(enquiryId);
@@ -90,7 +92,8 @@ export const deleteEnquiry = TryCatch(
     next: NextFunction
   ) => {
     const adminId = req.query.id;
-    const enquiryId = req.params.id;
+    // const enquiryId = req.params.id;
+    const enquiryId =1
 
     // Validate if the enquiry exists
     const existingEnquiry = await Enquiry.findById(enquiryId);

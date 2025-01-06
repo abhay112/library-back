@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { Document } from "mongoose";
+
 import validator from "validator";
 
 interface IMembershipPeriod {
@@ -17,7 +19,7 @@ interface IStudent extends Document {
   dateOfJoining?: string;
   feesId: mongoose.Schema.Types.ObjectId;
   libraryId: mongoose.Schema.Types.ObjectId; // Reference to Library
-  adminId: mongoose.Schema.Types.ObjectId; // Reference to Admin
+  adminId: string; // Reference to Admin
   attendance: mongoose.Schema.Types.ObjectId[];
   active?: boolean;
   membershipHistory: IMembershipPeriod[]; // Array to track membership periods
@@ -85,11 +87,11 @@ const StudentSchema = new mongoose.Schema(
       ref: "Library",
       required: true,
     },
-    adminId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
-      required: true,
-    },
+    // adminId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Admin",
+    //   required: true,
+    // },
     attendance: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -110,4 +112,4 @@ const StudentSchema = new mongoose.Schema(
   }
 );
 
-export const Student = mongoose.model("Student", schema);
+export const Student = mongoose.model("Student", StudentSchema);

@@ -20,7 +20,9 @@ export const newAttendance = TryCatch(
       console.log(fetchSeat);
       const seatNumber = fetchSeat?.matrix[idx1][idx2];
       const attendanceFound = await Attendance.findOne({ studentId: id, adminId: adminId });
-      const seatAlready = attendanceFound?.attendance.slice(-1)[0]?.seatNumber;
+      // const seatAlready = attendanceFound?.attendance.slice(-1)[0]?.seatNumber;
+      const seatAlready = (attendanceFound as any)?.attendance.slice(-1)[0]?.seatNumber;
+      // const seatAlready = 1;
       if (seatAlready === seatNumber) {
         return res.status(201).json({
           success: false,
@@ -64,7 +66,8 @@ export const attendanceApproved = TryCatch(
     const attendanceFound = await Attendance.findOne({ studentId: id });
 
     if (attendanceFound) {
-      const latestAttendance = attendanceFound.attendance.slice(-1)[0];
+      // const latestAttendance = attendanceFound.attendance.slice(-1)[0];
+      const latestAttendance = (attendanceFound as any)?.attendance.slice(-1)[0];
       if (latestAttendance.isPresent === "Pending") {
         await Attendance.updateOne(
           {
@@ -217,7 +220,9 @@ export const getPresentStudent = TryCatch(
     const attendances = await Attendance.find({ adminId: adminId });
     let result = attendances.map((attendance) => {
       const { studentId, adminId, studentName } = attendance;
-      const latestAttendance = attendance.attendance[attendance.attendance.length - 1];
+      // const latestAttendance = attendance.attendance[attendance.attendance.length - 1];
+      const latestAttendance = (attendance as any).attendance[(attendance as any).attendance.length - 1];
+
       const currentDate = new Date();
       const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
       // Remove the semicolon after the condition
@@ -247,7 +252,9 @@ export const getPendingAttendance = TryCatch(
     const attendances = await Attendance.find({});
     let result = attendances.map((attendance) => {
       const { studentId, adminId, studentName } = attendance;
-      const latestAttendance = attendance.attendance[attendance.attendance.length - 1];
+      // const latestAttendance = attendance.attendance[attendance.attendance.length - 1];
+      const latestAttendance = (attendance as any).attendance[(attendance as any).attendance.length - 1];
+
       const currentDate = new Date();
       const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
       if (latestAttendance.isPresent === "Pending" && latestAttendance.day === formattedDate) {

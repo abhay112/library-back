@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import {adminService,libraryService} from '../../services/admin/admin.service.js';
 import {studentService} from '../../services/admin/students.service.js';
-import {attendanceService} from '../../services/admin/attendance.service.js';
+import {AttendanceService} from '../../services/admin/attendance.service.js';
 
 import { StatusCodes } from 'http-status-codes';
 import { TryCatch } from '../../middlewares/error.js';
@@ -127,7 +127,7 @@ const AttendanceController: any = {
     }
 
     // Delegate attendance creation logic to the service
-    const result = await attendanceService.createAttendance(studentId,adminId, attendanceRecords);
+    const result = await AttendanceService.createAttendance(studentId,adminId, attendanceRecords);
 
     return res
         .status(result.success ? StatusCodes.CREATED : StatusCodes.BAD_REQUEST)
@@ -146,7 +146,7 @@ const AttendanceController: any = {
       });
     }
 
-    const result = await attendanceService.performActionOnAttendance(attendanceId, action);
+    const result = await AttendanceService.performActionOnAttendance(attendanceId, action);
     
     return res.status(result.success ? StatusCodes.OK : StatusCodes.BAD_REQUEST).json(result);
   }),
@@ -155,14 +155,14 @@ const AttendanceController: any = {
   checkOutStudent: TryCatch(async (req: Request, res: Response, next: NextFunction) => {
     const { studentId, attendanceId } = req.body; // Expect attendanceId in the request body
 
-    const result = await attendanceService.checkOutStudent(studentId, attendanceId);
+    const result = await AttendanceService.checkOutStudent(studentId, attendanceId);
 
     return res.status(result.success ? StatusCodes.OK : StatusCodes.BAD_REQUEST).json(result);  
   }),
 
   // Fetch All Attendance Records
   fetchAttendances: TryCatch(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await attendanceService.fetchAttendances(req.query);
+    const result = await AttendanceService.fetchAttendances(req.query);
     return res.status(StatusCodes.OK).json(result);
   }),
   // fetch pending attendance
@@ -176,25 +176,25 @@ const AttendanceController: any = {
         'attendanceRecords.isPresent': true, // Optional filter
     };
 
-    const result = await attendanceService.fetchAttendances(filter);
+    const result = await AttendanceService.fetchAttendances(filter);
     return res.status(StatusCodes.OK).json(result);
   }),
 
   // Fetch Attendance Record by Student ID
   getAttendanceByStudentId: TryCatch(async (req: Request, res: Response, next: NextFunction) => {
-    // const result = await attendanceService.fetchAttendanceByStudentId();
+    // const result = await AttendanceService.fetchAttendanceByStudentId();
     // return res.status(StatusCodes.OK).json(result);
   }),
 
   // Update Attendance Record
   updateAttendance: TryCatch(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await attendanceService.updateAttendance(req.params.id, req.body);
+    const result = await AttendanceService.updateAttendance(req.params.id, req.body);
     return res.status(StatusCodes.OK).json(result);
   }),
 
   // Delete Attendance Record
   deleteAttendance: TryCatch(async (req: Request, res: Response, next: NextFunction) => {
-    await attendanceService.deleteAttendance(req.params.id);
+    await AttendanceService.deleteAttendance(req.params.id);
     return res.status(StatusCodes.NO_CONTENT).send(); // 204 No Content
   }),
 };
@@ -231,9 +231,6 @@ const SeatsController: any = {
     return res.status(StatusCodes.NO_CONTENT).send(); // 204 No Content
   }),
 };
-
-
-
 
 
 export  {AdminController,LibraryController,StudentController, AttendanceController,SeatsController};

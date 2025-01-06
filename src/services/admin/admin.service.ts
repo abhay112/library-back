@@ -5,7 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import { Library } from "../../models/library.js";
 
 
-const adminService = {
+const adminService:any = {
   createAdmin: async (userData: {
     name: string;
     email: string;
@@ -107,7 +107,7 @@ const adminService = {
   },
 };
 
-const libraryService = {
+const libraryService:any = {
   // Create Library
   createLibrary: async (libraryData: {
     name: string;

@@ -7,7 +7,7 @@ import moment from "moment-timezone";
 import Seats from "../../models/seats.js";
 import { Student } from "../../models/student.js";
 
-const attendanceService = {
+const AttendanceService:any = {
 
     createAttendance: async (studentId: string, adminId:string, attendanceRecords: any[]) => {
         const session = await mongoose.startSession();
@@ -372,45 +372,45 @@ const attendanceService = {
         }
     },
 
-  // Update Attendance
-  updateAttendance: async (id: string, updateData: any) => {
-    try {
-      const attendance = await Attendance.findById(id);
-      if (!attendance) {
-        throw new ErrorHandler("Attendance record not found", StatusCodes.NOT_FOUND);
-      }
+    // Update Attendance
+    updateAttendance: async (id: string, updateData: any) => {
+        try {
+        const attendance = await Attendance.findById(id);
+        if (!attendance) {
+            throw new ErrorHandler("Attendance record not found", StatusCodes.NOT_FOUND);
+        }
 
-      // Update the fields as necessary
-      Object.assign(attendance, updateData);
-      await attendance.save();
+        // Update the fields as necessary
+        Object.assign(attendance, updateData);
+        await attendance.save();
 
-      return {
-        success: true,
-        message: `Attendance record updated successfully`,
-        attendance,
-      };
-    } catch (error) {
-      throw new ErrorHandler("Error updating attendance record", StatusCodes.BAD_REQUEST);
-    }
-  },
+        return {
+            success: true,
+            message: `Attendance record updated successfully`,
+            attendance,
+        };
+        } catch (error) {
+        throw new ErrorHandler("Error updating attendance record", StatusCodes.BAD_REQUEST);
+        }
+    },
 
-  // Delete Attendance
-  deleteAttendance: async (id: string) => {
-    try {
-      const attendance = await Attendance.findById(id);
-      if (!attendance) {
-        throw new ErrorHandler("Attendance record not found", StatusCodes.NOT_FOUND);
-      }
+    // Delete Attendance
+    deleteAttendance: async (id: string) => {
+        try {
+        const attendance = await Attendance.findById(id);
+        if (!attendance) {
+            throw new ErrorHandler("Attendance record not found", StatusCodes.NOT_FOUND);
+        }
 
-    //   await attendance.remove();
-      return {
-        success: true,
-        message: "Attendance record deleted successfully",
-      };
-    } catch (error) {
-      throw new ErrorHandler("Error deleting attendance record", StatusCodes.BAD_REQUEST);
-    }
-  },
+        //   await attendance.remove();
+        return {
+            success: true,
+            message: "Attendance record deleted successfully",
+        };
+        } catch (error) {
+        throw new ErrorHandler("Error deleting attendance record", StatusCodes.BAD_REQUEST);
+        }
+    },
 };
 
-export { attendanceService };
+export { AttendanceService };

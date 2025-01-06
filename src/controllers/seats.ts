@@ -45,7 +45,7 @@ export const fetchFilledSeats = TryCatch(
         const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
         let result = attendances.map((attendance) => {
           const { studentId, adminId, studentName } = attendance;
-          const latestAttendance = attendance.attendance[attendance.attendance.length - 1];
+          const latestAttendance = (attendance as any).attendance[(attendance as any).attendance.length - 1];
           if (latestAttendance.day === formattedDate) {
             return {
               studentId,
