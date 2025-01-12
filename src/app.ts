@@ -11,7 +11,7 @@ import NodeCache from 'node-cache';
 import Stripe from 'stripe';
 import { config } from 'dotenv';
 import { logger, stream } from './utils/logger.js';
-import { Routes } from './interfaces/route.interface.js';
+import { Routes } from './interfaces/routes.interface.js';
 import { errorMiddleware } from './middlewares/error.js';
 import swaggerDocument from './swagger.json';
 
@@ -86,8 +86,13 @@ class App {
 
   private initializeRoutes(routes: Routes[]) {
     routes.forEach((route) => {
+      console.log(route.router,'route.router')
       this.app.use('/api/v1', route.router);
     });
+
+    this.app.get('/', (req, res) => {
+      res.status(200).json({ message: 'API is working!' });
+  });
   }
 
   private initializeSwagger() {
@@ -98,5 +103,7 @@ class App {
     this.app.use(errorMiddleware);
   }
 }
+
+console.log('holaa')
 export const myCache = new NodeCache();
 export default App;

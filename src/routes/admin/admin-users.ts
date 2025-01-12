@@ -1,6 +1,6 @@
 import express,{Router} from 'express';
 import {AdminController} from '../../controllers/admin/admin.controller.js'; 
-import { Routes } from '../../interfaces/route.interface.js';
+import { Routes } from '../../interfaces/routes.interface.js';
 
 // AdminRoute Class
 class AdminRoute implements Routes {

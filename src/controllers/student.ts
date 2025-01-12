@@ -16,7 +16,9 @@ export const newStudent = TryCatch(
     const { name, email, mobile, shift, feesAmount } = req.body;
     const adminId = req.query.id;
     const adminDetails = await User.findOne({ _id: adminId });
-    let library = adminDetails?.library || "defaultLibrary";
+    // let library = adminDetails?.library || "defaultLibrary";
+    let library = "defaultLibrary";
+
     const photo = req?.file;
     const { day, month, year } = getCurrentDateObj();
     const todayDate = getCurrentFormattedDate();

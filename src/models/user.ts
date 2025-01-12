@@ -1,52 +1,24 @@
-import mongoose from "mongoose";
-import { Document } from 'mongoose';
-import validator from "validator";
+import mongoose, { Document } from "mongoose";
 
 interface IUser extends Document {
-  _id: string;
   name: string;
   email: string;
-  photo: string;
-  role: "admin" | "user";
-  library:string,
+  photo?: string;
+  role: "USER" | "ADMIN";
+  libraryId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const schema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<IUser>(
   {
-    _id: {
-      type: String,
-      required: [true, "Please enter ID"],
-    },
-    name: {
-      type: String,
-      required: [true, "Please enter Name"],
-    },
-    email: {
-      type: String,
-      unique: [true, "Email already Exist"],
-      required: [true, "Please enter Name"],
-      validate: validator.default.isEmail,
-    },
-    photo: {
-      type: String,
-      required: [true, "Please add Photo"],
-    },
-    role: {
-      type: String,
-      enum: ["admin", "user"],
-      default: "user",
-    },
-    library: {
-      type: String,
-      required: [false, "Please enter library name"],
-    },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    photo: { type: String },
+    role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
+    libraryId: { type: String },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-
-export const User = mongoose.model<IUser>("User", schema);
+export const User = mongoose.model<IUser>("User", userSchema);
